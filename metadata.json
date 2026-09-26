@@ -1,0 +1,6 @@
+{
+  "name": "Sổ Thu Chi - Quản Lý Chi Tiêu Cá Nhân PWA",
+  "description": "Ứng dụng PWA ghi chép thu chi cá nhân đơn giản, mượt mà chuẩn iOS, lưu trữ trực tiếp trên thiết bị và hỗ trợ biểu đồ thống kê.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

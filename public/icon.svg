@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="50%" stop-color="#1e1b4b" />
+      <stop offset="100%" stop-color="#064e3b" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#818cf8" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-opacity="0.35" flood-color="#000" />
+    </filter>
+  </defs>
+
+  <!-- Background squircle -->
+  <rect width="512" height="512" rx="128" fill="url(#bg)" />
+
+  <!-- Subtle glow inner ring -->
+  <rect x="16" y="16" width="480" height="480" rx="116" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3" />
+
+  <!-- Main Card Graphic -->
+  <g filter="url(#shadow)">
+    <!-- Back card / ledger -->
+    <rect x="96" y="120" width="320" height="230" rx="28" fill="#1e293b" opacity="0.85" stroke="rgba(255,255,255,0.12)" stroke-width="2" />
+    <circle cx="150" cy="170" r="18" fill="url(#accentGrad)" opacity="0.9" />
+    <rect x="185" y="162" width="120" height="16" rx="8" fill="rgba(255,255,255,0.3)" />
+
+    <!-- Front wallet / balance card -->
+    <rect x="96" y="180" width="320" height="200" rx="28" fill="url(#cardGrad)" />
+    
+    <!-- Pattern lines on front card -->
+    <circle cx="360" cy="220" r="45" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="20" />
+    
+    <!-- Chip / Currency symbol -->
+    <rect x="135" y="220" width="48" height="38" rx="8" fill="#fef08a" opacity="0.95" />
+    <path d="M147 220 v38 M171 220 v38 M135 239 h48" stroke="#ca8a04" stroke-width="2" />
+
+    <!-- Ledger text lines -->
+    <rect x="135" y="285" width="160" height="14" rx="7" fill="rgba(255,255,255,0.9)" />
+    <rect x="135" y="312" width="90" height="10" rx="5" fill="rgba(255,255,255,0.6)" />
+
+    <!-- Up/Down arrows badge -->
+    <circle cx="355" cy="320" r="32" fill="#ffffff" />
+    <!-- Green Up / Red Down -->
+    <path d="M346 326 l-6 -6 l-6 6 M340 320 v12" stroke="#ef4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M362 314 l6 -6 l6 6 M368 320 v-12" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+</svg>
