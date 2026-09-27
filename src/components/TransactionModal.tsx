@@ -38,7 +38,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       setAmountStr(formatThousands(editingTransaction.amount.toString()));
       setCategoryId(editingTransaction.categoryId);
       setNote(editingTransaction.note || '');
-      setDate(editingTransaction.date.slice(0, 16));
+      setDate(toInputDateFormat(editingTransaction.date));
     } else {
       setType('expense');
       setAmountStr('');
@@ -75,6 +75,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     const current = parseRawAmount(amountStr);
     const updated = current + delta;
     setAmountStr(formatThousands(updated.toString()));
+    if (error) setError('');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -85,6 +86,29 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       setError('Vui lòng nhập số tiền lớn hơn 0');
       triggerHaptic('warning', hapticEnabled);
       return;
+    }
+
+    // Safely parse date across all browsers and iOS Safari
+    let safeIsoDate = new Date().toISOString();
+    try {
+      if (date) {
+        const parsed = new Date(date);
+        if (!isNaN(parsed.getTime())) {
+          safeIsoDate = parsed.toISOString();
+        } else {
+          const [dPart, tPart] = date.split('T');
+          if (dPart) {
+            const [y, m, d] = dPart.split('-').map(Number);
+            const [h, min] = (tPart || '00:00').split(':').map(Number);
+            const fallback = new Date(y, (m || 1) - 1, d || 1, h || 0, min || 0);
+            if (!isNaN(fallback.getTime())) {
+              safeIsoDate = fallback.toISOString();
+            }
+          }
+        }
+      }
+    } catch {
+      safeIsoDate = new Date().toISOString();
     }
 
     triggerHaptic('success', hapticEnabled);
@@ -107,7 +131,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         amount: numericAmount,
         categoryId,
         note: note.trim(),
-        date: new Date(date).toISOString(),
+        date: safeIsoDate,
       },
       editingTransaction?.id
     );
@@ -148,7 +172,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-2 space-y-4 no-scrollbar">
+            <form onSubmit={handleSubmit} noValidate className="flex-1 overflow-y-auto px-6 py-2 space-y-4 no-scrollbar">
               {/* Type Switcher: Segmented Control iOS Style */}
               <div className="p-1 rounded-2xl bg-slate-100 dark:bg-slate-800 flex gap-1">
                 <button
@@ -189,7 +213,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   <input
                     type="text"
                     inputMode="numeric"
-                    pattern="[0-9]*"
                     autoFocus={!editingTransaction}
                     value={amountStr}
                     onChange={handleAmountChange}

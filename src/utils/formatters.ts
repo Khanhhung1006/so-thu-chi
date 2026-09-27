@@ -42,7 +42,17 @@ export function parseRawAmount(val: string): number {
   return digits ? Number(digits) : 0;
 }
 
-export function toInputDateFormat(date: Date = new Date()): string {
+export function toInputDateFormat(dateInput: Date | string = new Date()): string {
+  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+  if (isNaN(date.getTime())) {
+    const fallback = new Date();
+    const y = fallback.getFullYear();
+    const m = String(fallback.getMonth() + 1).padStart(2, '0');
+    const d = String(fallback.getDate()).padStart(2, '0');
+    const h = String(fallback.getHours()).padStart(2, '0');
+    const min = String(fallback.getMinutes()).padStart(2, '0');
+    return `${y}-${m}-${d}T${h}:${min}`;
+  }
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');

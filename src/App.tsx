@@ -4,6 +4,8 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { CheckCircle2 } from 'lucide-react';
 import { AppSettings, TabType, TimeFilter, Transaction } from './types';
 import {
   DEFAULT_SETTINGS,
@@ -13,7 +15,8 @@ import {
   saveTransactions,
   triggerHaptic,
 } from './utils/storage';
-import { filterTransactionsByTime } from './utils/formatters';
+import { filterTransactionsByTime, formatCurrency } from './utils/formatters';
+import { getCategoryById } from './constants/categories';
 import { HeaderCard } from './components/HeaderCard';
 import { TransactionList } from './components/TransactionList';
 import { TransactionModal } from './components/TransactionModal';
@@ -32,6 +35,8 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [isInstallGuideOpen, setIsInstallGuideOpen] = useState(false);
+  const [saveToast, setSaveToast] = useState<string | null>(null);
+  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // 5-second Undo state
   const [undoItem, setUndoItem] = useState<Transaction | null>(null);
@@ -42,6 +47,14 @@ export default function App() {
 
   // Dark mode effect
   const [isDark, setIsDark] = useState(false);
+
+  const showSaveToast = (msg: string) => {
+    setSaveToast(msg);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => {
+      setSaveToast(null);
+    }, 3000);
+  };
 
   useEffect(() => {
     const updateTheme = () => {
@@ -100,16 +113,33 @@ export default function App() {
     existingId?: string
   ) => {
     if (existingId) {
-      setTransactions((prev) =>
-        prev.map((t) => (t.id === existingId ? { ...t, ...data } : t))
-      );
+      setTransactions((prev) => {
+        const updated = prev.map((t) => (t.id === existingId ? { ...t, ...data } : t));
+        saveTransactions(updated);
+        return updated;
+      });
+      showSaveToast('Đã cập nhật giao dịch');
     } else {
       const newTx: Transaction = {
         ...data,
         id: `tx-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         createdAt: Date.now(),
       };
-      setTransactions((prev) => [newTx, ...prev]);
+      setTransactions((prev) => {
+        const updated = [newTx, ...prev];
+        saveTransactions(updated);
+        return updated;
+      });
+
+      // Automatically adjust filter to 'all' if new transaction wouldn't be visible in current view
+      const isVisibleInCurrentFilter = filterTransactionsByTime([newTx], timeFilter).length > 0;
+      if (!isVisibleInCurrentFilter) {
+        setTimeFilter('all');
+      }
+
+      const cat = getCategoryById(newTx.categoryId);
+      const sign = newTx.type === 'expense' ? '-' : '+';
+      showSaveToast(`Đã lưu ${cat.name}: ${sign}${formatCurrency(newTx.amount, settings.currency)}`);
     }
   };
 
@@ -187,7 +217,21 @@ export default function App() {
       <div className="pt-safe-top" />
 
       {/* Main Container - Optimized for iPhone screen widths (375px - 430px) */}
-      <main className="flex-1 w-full max-w-md mx-auto px-4 py-3">
+      <main className="flex-1 w-full max-w-md mx-auto px-4 py-3 relative">
+        {/* Save confirmation toast */}
+        <AnimatePresence>
+          {saveToast && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -15, scale: 0.95 }}
+              className="sticky top-2 z-30 mb-3 bg-emerald-600 text-white px-4 py-2.5 rounded-2xl shadow-lg shadow-emerald-600/30 flex items-center gap-2 text-xs font-semibold backdrop-blur-md"
+            >
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-white" />
+              <span className="truncate flex-1">{saveToast}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
         {currentTab === 'transactions' && (
           <div className="space-y-4">
             <HeaderCard

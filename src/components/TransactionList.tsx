@@ -58,7 +58,10 @@ export const TransactionList: React.FC<TransactionListProps> = ({
     );
 
     sorted.forEach((item) => {
-      const dayKey = item.date.slice(0, 10);
+      const d = new Date(item.date);
+      const dayKey = isNaN(d.getTime())
+        ? item.date.slice(0, 10)
+        : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       if (!groups[dayKey]) {
         groups[dayKey] = {
           dateStr: item.date,
